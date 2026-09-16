@@ -49,3 +49,27 @@ export const createProject = async (req, res) => {
         res.status(500).json({ message: "Internal server error" });
     }
 };
+
+export const getProjects = async (req, res) => {
+    try {
+        const teamId = req.params.teamId;
+        const userId = req.user._id;
+
+        const team = await Team.findById(teamId);
+        if (!team)
+            return res.status(400).json({ message: "Such team does not exist" });
+
+        const isMember = team.members.some(
+            member => member.user.equals(userId)
+        );
+        if (!isMember)
+            return res.status(400).json({ message: "Unauthorized - only team members and owner can access the list of projects" });
+
+        const projects = await Project.find({ team: teamId }).select("-createdBy");
+
+        res.status(200).json(projects);
+    } catch (error) {
+        console.log("Error in getProjects in project controller : ", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
