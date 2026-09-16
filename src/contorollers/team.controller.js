@@ -60,3 +60,42 @@ export const getTeams = async (req, res) => {
         res.status(500).json({ message: "Internal server error" });
     }
 };
+
+export const addMember = async (req, res) => {
+    try {
+        const teamId = req.params.teamId;
+        const { userId } = req.body;
+        const ownerId = req.user._id;
+
+        if (!userId)
+            return res.status(400).json({ message: "User Id is required" });
+
+        const team = await Team.findById({ teamId });
+        if (!team)
+            return res.status(400).json({ message: "Such team does not exist" });
+
+        if (!ownerId.equals(team.owner))
+            return res.status(400).json({ message: "Unauthorized - only owner can add members" });
+
+        if (!(await User.findById({ userId })))
+            return res.status(400).json({ message: "Such user does not exist" });
+
+        const checkuser = team.members.some(
+            member => member.user.equals(userId)
+        );
+
+        if (checkuser)
+            return res.status(400).json({ message: "Already a member" });
+
+        team.members.push({
+            user: userId,
+        });
+
+        await team.save();
+
+        res.status(200).json(team);
+    } catch (error) {
+        console.log("Error in addMember team controller : ", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
