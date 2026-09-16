@@ -1,6 +1,7 @@
 import express from "express";
 import authRoutes from "./routes/auth.route.js";
 import cookieParser from "cookie-parser";
+import teamRoutes from "./routes/team.route.js";
 
 const app = express();
 
@@ -9,5 +10,6 @@ app.use(cookieParser());
 
 // endpoints
 app.use("/api/auth", authRoutes);
+app.use("/api/team", teamRoutes);
 
 export default app;
