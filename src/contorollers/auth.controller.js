@@ -1,3 +1,4 @@
+import { generateToken } from "../lib/generateToken.js";
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 
@@ -35,6 +36,7 @@ export const register = async (req, res) => {
 
 
         await newUser.save();
+        generateToken(newUser._id, res);
 
         res.status(201).json({
             _id: newUser._id,
@@ -46,4 +48,37 @@ export const register = async (req, res) => {
         console.log("Error in signup controller ", error);
         res.status(500).json({ message: "Internal Server Error" });
     }
+};
+
+export const login = async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        if (!email || !password)
+            return res.status(400).json({ message: "Email and Password are required" });
+
+        const user = await User.findOne({ email });
+        if (!user)
+            return res.status(400).json({ message: "Invalid credentials" });
+
+        const isPasswordCorrect = await bcrypt.compare(password, user.password);
+        if (!isPasswordCorrect)
+            return res.status(400).json({ message: "Invalid credentials" });
+
+        generateToken(user._id, res);
+
+        res.status(200).json({
+            _id: user._id,
+            name: user.name,
+            email: user.email
+        });
+    } catch (error) {
+        console.log("Error in login controller : ", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+export const logout = (_, res) => {
+    res.clearCookie("jwt");
+    res.status(200).json({ message: "Logged out succesfully" });
 };
