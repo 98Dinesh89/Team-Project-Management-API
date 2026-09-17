@@ -45,14 +45,15 @@ export const createTask = async (req, res) => {
 
         if (assignedTo) {
             const isAssignedUser = team.members.some(
-                member => member.user.equals(assignedTo
-                )
+                member => member.user.equals(assignedTo)
             );
             if (!isAssignedUser)
                 return res.status(400).json({ message: "The user you are assigning to either does not exist or is not a part of this team" });
             else {
                 newTask.assignedTo = assignedTo;
                 list.assignedTo = assignedTo;
+                newTask.status = "in_progress";
+                list.status = "in_progress";
             }
         }
         if (description) {
@@ -69,6 +70,39 @@ export const createTask = async (req, res) => {
         res.status(200).json({ list });
 
     } catch (error) {
+        console.log("Error in createTask task controller : ", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
 
+export const getTasks = async (req, res) => {
+    try {
+        const projectId = req.params.projectId;
+        const userId = req.user._id;
+
+        if (!projectId)
+            return res.status(400).json({ message: "ProjectId is required" });
+
+        const project = await Project.findById(projectId);
+        if (!project)
+            return res.status(400).json({ message: "Such project does not exist" });
+
+        const teamId = project.team;
+        const team = await Team.findById(teamId);
+        if (!team)
+            return res.status(400).json({ message: "This project does not belong to any team" });
+
+        const isMember = team.members.some(
+            member => member.user.equals(userId)
+        );
+        if (!isMember)
+            return res.status(400).json({ message: "Unauthorized - only team members can access team's projects and tasks" });
+
+        const tasks = await Task.find({ project: projectId });
+
+        res.status(200).json(tasks);
+    } catch (error) {
+        console.log("Error in getTasks task controller : ", error);
+        res.status(500).json({ message: "Internal server error" });
     }
 };
