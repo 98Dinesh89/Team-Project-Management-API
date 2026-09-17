@@ -70,14 +70,14 @@ export const addMember = async (req, res) => {
         if (!userId)
             return res.status(400).json({ message: "User Id is required" });
 
-        const team = await Team.findById({ teamId });
+        const team = await Team.findById(teamId);
         if (!team)
             return res.status(400).json({ message: "Such team does not exist" });
 
         if (!ownerId.equals(team.owner))
             return res.status(400).json({ message: "Unauthorized - only owner can add members" });
 
-        if (!(await User.findById({ userId })))
+        if (!(await User.findById(userId)))
             return res.status(400).json({ message: "Such user does not exist" });
 
         const checkuser = team.members.some(

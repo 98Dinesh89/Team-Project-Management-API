@@ -6,6 +6,6 @@ const router = express.Router();
 
 router.post("/", protectRoute, createTeam);
 router.get("/", protectRoute, getTeams);
-router.post("/:teamId/members", protectRoute, addMember);
+router.post("/:teamId", protectRoute, addMember);
 
 export default router;
