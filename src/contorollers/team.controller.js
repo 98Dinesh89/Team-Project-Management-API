@@ -34,6 +34,7 @@ export const createTeam = async (req, res) => {
             .populate("members.user", "name email");
 
         res.status(201).json({
+            _id: populatedTeam._id,
             name: populatedTeam.name,
             members: populatedTeam.members.map(member => ({
                 _id: member.user._id,
@@ -63,19 +64,11 @@ export const getTeams = async (req, res) => {
 
 export const addMember = async (req, res) => {
     try {
-        const teamId = req.params.teamId;
+        const team = req.team;
         const { userId } = req.body;
-        const ownerId = req.user._id;
 
         if (!userId)
             return res.status(400).json({ message: "User Id is required" });
-
-        const team = await Team.findById(teamId);
-        if (!team)
-            return res.status(400).json({ message: "Such team does not exist" });
-
-        if (!ownerId.equals(team.owner))
-            return res.status(400).json({ message: "Unauthorized - only owner can add members" });
 
         if (!(await User.findById(userId)))
             return res.status(400).json({ message: "Such user does not exist" });
