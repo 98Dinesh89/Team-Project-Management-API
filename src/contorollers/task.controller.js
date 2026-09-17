@@ -1,32 +1,14 @@
-import Project from "../models/project.model.js";
 import Task from "../models/task.model.js";
-import Team from "../models/team.model.js";
-import User from "../models/user.model.js";
 
 export const createTask = async (req, res) => {
     try {
-        const projectId = req.params.projectId;
+        const projectId = req.project._id;
         const creatorId = req.user._id;
+        const team = req.team;
         const { title, description, assignedTo, status, priority, dueDate } = req.body;
 
         if (!title || !priority)
             return res.status(400).json({ message: "Some fields are required" });
-
-        const project = await Project.findById(projectId);
-        if (!project)
-            return res.status(400).json({ message: "Such Project does not exist" });
-
-
-        const teamId = project.team;
-        const team = await Team.findById(teamId);
-        if (!team)
-            return res.status(400).json({ message: "The project does not belong to any active team" });
-
-        const checkuser = team.members.some(
-            member => member.user.equals(creatorId)
-        );
-        if (!checkuser)
-            return res.status(400).json({ message: "Unauthorized - This user cannot create task" });
 
         const newTask = new Task({
             title,
@@ -77,26 +59,7 @@ export const createTask = async (req, res) => {
 
 export const getTasks = async (req, res) => {
     try {
-        const projectId = req.params.projectId;
-        const userId = req.user._id;
-
-        if (!projectId)
-            return res.status(400).json({ message: "ProjectId is required" });
-
-        const project = await Project.findById(projectId);
-        if (!project)
-            return res.status(400).json({ message: "Such project does not exist" });
-
-        const teamId = project.team;
-        const team = await Team.findById(teamId);
-        if (!team)
-            return res.status(400).json({ message: "This project does not belong to any team" });
-
-        const isMember = team.members.some(
-            member => member.user.equals(userId)
-        );
-        if (!isMember)
-            return res.status(400).json({ message: "Unauthorized - only team members can access team's projects and tasks" });
+        const projectId = req.project._id;
 
         const tasks = await Task.find({ project: projectId });
 

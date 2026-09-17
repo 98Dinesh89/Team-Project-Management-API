@@ -1,24 +1,13 @@
 import Project from "../models/project.model.js";
-import Team from "../models/team.model.js";
 
 export const createProject = async (req, res) => {
     try {
-        const teamId = req.params.teamId;
-        const { name, description, status } = req.body;
+        const teamId = req.team._id;
+        const { name, description } = req.body;
         const makerId = req.user._id;
 
-        if (!name || !teamId)
+        if (!name)
             return res.status(400).json({ message: "project name is required" });
-
-        const team = await Team.findById(teamId);
-        if (!team)
-            return res.status(400).json({ message: "no such team available" });
-
-        const isMember = team.members.some(
-            member => member.user.equals(makerId)
-        );
-        if (!isMember)
-            return res.status(400).json({ message: "Unauthorized - only team members and owner can create project" });
 
         const project = await Project.findOne({
             name,
@@ -31,8 +20,7 @@ export const createProject = async (req, res) => {
             name,
             description,
             team: teamId,
-            createdBy: makerId,
-            status
+            createdBy: makerId
         });
 
         await newProject.save();
@@ -52,18 +40,7 @@ export const createProject = async (req, res) => {
 
 export const getProjects = async (req, res) => {
     try {
-        const teamId = req.params.teamId;
-        const userId = req.user._id;
-
-        const team = await Team.findById(teamId);
-        if (!team)
-            return res.status(400).json({ message: "Such team does not exist" });
-
-        const isMember = team.members.some(
-            member => member.user.equals(userId)
-        );
-        if (!isMember)
-            return res.status(400).json({ message: "Unauthorized - only team members and owner can access the list of projects" });
+        const teamId = req.team._id;
 
         const projects = await Project.find({ team: teamId }).select("-createdBy");
 
