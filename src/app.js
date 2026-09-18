@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser";
 import teamRoutes from "./routes/team.route.js";
 import projectRoutes from "./routes/project.route.js";
 import taskRoutes from "./routes/task.route.js";
+import { errorHandler } from "./middlewares/error.middleware.js";
 
 const app = express();
 
@@ -15,5 +16,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/team", teamRoutes);
 app.use("/api/project", projectRoutes);
 app.use("/api/task", taskRoutes);
+
+// error handling
+app.use(errorHandler);
 
 export default app;

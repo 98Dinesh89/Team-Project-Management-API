@@ -128,8 +128,7 @@ export const taskMember = async (req, res, next) => {
         req.task = task;
         next();
     } catch (error) {
-        console.log("Error in taskMember Middleware : ", error);
-        res.status(401).json({ message: "Internal Server Error" });
+        next(error);
     }
 };
 
