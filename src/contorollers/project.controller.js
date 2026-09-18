@@ -1,6 +1,6 @@
 import Project from "../models/project.model.js";
 
-export const createProject = async (req, res) => {
+export const createProject = async (req, res, next) => {
     try {
         const teamId = req.team._id;
         const { name, description } = req.body;
@@ -9,6 +9,8 @@ export const createProject = async (req, res) => {
         if (!name)
             return res.status(400).json({ message: "project name is required" });
 
+
+        // This is also checked in errorHandker middleware
         const project = await Project.findOne({
             name,
             team: teamId
@@ -33,12 +35,11 @@ export const createProject = async (req, res) => {
             status: newProject.status
         });
     } catch (error) {
-        console.log("Error in createProject project controller : ", error);
-        res.status(500).json({ message: "Internal server error" });
+        next(error);
     }
 };
 
-export const getProjects = async (req, res) => {
+export const getProjects = async (req, res, next) => {
     try {
         const teamId = req.team._id;
 
@@ -46,7 +47,6 @@ export const getProjects = async (req, res) => {
 
         res.status(200).json(projects);
     } catch (error) {
-        console.log("Error in getProjects in project controller : ", error);
-        res.status(500).json({ message: "Internal server error" });
+        next(error);
     }
 };

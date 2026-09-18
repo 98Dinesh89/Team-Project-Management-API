@@ -31,6 +31,11 @@ const teamSchema = mongoose.Schema(
     }
 );
 
+teamSchema.index(
+    { name: 1, owner: 1 },
+    { unique: true }
+);
+
 const Team = mongoose.model("Team", teamSchema);
 
 export default Team;

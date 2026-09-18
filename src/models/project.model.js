@@ -30,6 +30,11 @@ const projectSchema = new mongoose.Schema(
     }
 );
 
+projectSchema.index(
+    { name: 1, team: 1 },
+    { unique: true }
+);
+
 const Project = mongoose.model("Project", projectSchema);
 
 export default Project;

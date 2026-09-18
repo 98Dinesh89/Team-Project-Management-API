@@ -3,7 +3,7 @@ import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 
 
-export const register = async (req, res) => {
+export const register = async (req, res, next) => {
     const { name, email, password } = req.body;
 
     try {
@@ -20,6 +20,7 @@ export const register = async (req, res) => {
             return res.status(400).json({ message: "Invalid email format" });
         }
 
+        // Also checked in error handler
         const user = await User.findOne({ email });
         if (user) {
             return res.status(400).json({ message: "Email already exists" });
@@ -45,12 +46,11 @@ export const register = async (req, res) => {
         });
 
     } catch (error) {
-        console.log("Error in signup controller ", error);
-        res.status(500).json({ message: "Internal Server Error" });
+        next(error);
     }
 };
 
-export const login = async (req, res) => {
+export const login = async (req, res, next) => {
     try {
         const { email, password } = req.body;
 
@@ -73,8 +73,7 @@ export const login = async (req, res) => {
             email: user.email
         });
     } catch (error) {
-        console.log("Error in login controller : ", error);
-        res.status(500).json({ message: "Internal server error" });
+        next(error);
     }
 };
 

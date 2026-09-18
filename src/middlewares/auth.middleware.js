@@ -21,10 +21,9 @@ export const protectRoute = async (req, res, next) => {
         req.user = user;
         next();
     } catch (error) {
-        console.log("Error in protectRoute Middleware : ", error);
-        res.status(401).json({ message: "Unauthorized - Invalid or expired token" });
+        next(error);
     }
-}
+};
 
 export const teamMember = async (req, res, next) => {
     try {
@@ -33,7 +32,7 @@ export const teamMember = async (req, res, next) => {
 
         const team = await Team.findById(teamId);
         if (!team)
-            return res.status(400).json({ message: "Such team does not exist" });
+            return res.status(404).json({ message: "Such team does not exist" });
 
         const isMember = team.members.some(
             member => member.user.equals(userId)
@@ -44,8 +43,7 @@ export const teamMember = async (req, res, next) => {
         req.team = team;
         next();
     } catch (error) {
-        console.log("Error in teamMember Middleware : ", error);
-        res.status(401).json({ message: "Internal Server Error" });
+        next(error);
     }
 };
 
@@ -56,7 +54,7 @@ export const teamOwner = async (req, res, next) => {
 
         const team = await Team.findById(teamId);
         if (!team)
-            return res.status(400).json({ message: "Such team does not exist" });
+            return res.status(404).json({ message: "Such team does not exist" });
 
         if (!userId.equals(team.owner))
             return res.status(400).json({ message: "User is not the owner of team" });
@@ -64,8 +62,7 @@ export const teamOwner = async (req, res, next) => {
         req.team = team;
         next();
     } catch (error) {
-        console.log("Error in teamOwner Middleware : ", error);
-        res.status(401).json({ message: "Internal Server Error" });
+        next(error);
     }
 };
 
@@ -76,7 +73,7 @@ export const projectMember = async (req, res, next) => {
 
         const project = await Project.findById(projectId);
         if (!project)
-            return res.status(400).json({ message: "Such project does not exist" });
+            return res.status(404).json({ message: "Such project does not exist" });
 
         const teamId = project.team;
         const team = await Team.findById(teamId);
@@ -93,8 +90,7 @@ export const projectMember = async (req, res, next) => {
         req.team = team;
         next();
     } catch (error) {
-        console.log("Error in ProjectMember Middleware : ", error);
-        res.status(401).json({ message: "Internal Server Error" });
+        next(error);
     }
 };
 
@@ -115,7 +111,7 @@ export const taskMember = async (req, res, next) => {
         const teamId = project.team;
         const team = await Team.findById(teamId);
         if (!team)
-            return res.status(400).json({ message: "This task doesn not belong to any valid team" });
+            return res.status(404).json({ message: "This task doesn not belong to any valid team" });
 
         const isMember = team.members.some(
             member => member.user.equals(userId)
@@ -131,11 +127,3 @@ export const taskMember = async (req, res, next) => {
         next(error);
     }
 };
-
-// task exists
-//    ↓
-// get task.project
-//    ↓
-// get project.team
-//    ↓
-// check req.user is team member

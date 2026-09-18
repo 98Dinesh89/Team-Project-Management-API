@@ -1,7 +1,7 @@
 import User from "../models/user.model.js";
 import Team from "../models/team.model.js";
 
-export const createTeam = async (req, res) => {
+export const createTeam = async (req, res, next) => {
     try {
         const { name } = req.body;
         const ownerId = req.user._id;
@@ -9,11 +9,13 @@ export const createTeam = async (req, res) => {
         if (!name)
             return res.status(400).json({ message: "Team name is required" });
 
-        const team = await Team.findOne({ name });
+        // Also checked in error handler
+        const team = await Team.findOne({
+            name,
+            owner: ownerId
+        });
         if (team) {
-            const teamOwnerId = team.owner;
-            if (ownerId.equals(teamOwnerId))
-                return res.status(400).json({ message: "Team already exists" });
+            return res.status(400).json({ message: "Team already exists" });
         }
 
         const newTeam = new Team({
@@ -44,12 +46,11 @@ export const createTeam = async (req, res) => {
         });
 
     } catch (error) {
-        console.log("Error in createTeam in team controller : ", error);
-        res.status(500).json({ message: "Internal server error" });
+        next(error);
     }
 };
 
-export const getTeams = async (req, res) => {
+export const getTeams = async (req, res, next) => {
     try {
         const user = req.user;
 
@@ -57,12 +58,11 @@ export const getTeams = async (req, res) => {
 
         res.status(200).json(teamList);
     } catch (error) {
-        console.log("Error in getTeams in team controller : ", error);
-        res.status(500).json({ message: "Internal server error" });
+        next();
     }
 };
 
-export const addMember = async (req, res) => {
+export const addMember = async (req, res, next) => {
     try {
         const team = req.team;
         const { userId } = req.body;
@@ -88,7 +88,6 @@ export const addMember = async (req, res) => {
 
         res.status(200).json(team);
     } catch (error) {
-        console.log("Error in addMember team controller : ", error);
-        res.status(500).json({ message: "Internal server error" });
+        next(error);
     }
 };

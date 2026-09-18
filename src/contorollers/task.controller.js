@@ -1,6 +1,6 @@
 import Task from "../models/task.model.js";
 
-export const createTask = async (req, res) => {
+export const createTask = async (req, res, next) => {
     try {
         const projectId = req.project._id;
         const creatorId = req.user._id;
@@ -52,12 +52,11 @@ export const createTask = async (req, res) => {
         res.status(200).json({ list });
 
     } catch (error) {
-        console.log("Error in createTask task controller : ", error);
-        res.status(500).json({ message: "Internal server error" });
+        next(error);
     }
 };
 
-export const getTasks = async (req, res) => {
+export const getTasks = async (req, res, next) => {
     try {
         const projectId = req.project._id;
 
@@ -65,8 +64,7 @@ export const getTasks = async (req, res) => {
 
         res.status(200).json(tasks);
     } catch (error) {
-        console.log("Error in getTasks task controller : ", error);
-        res.status(500).json({ message: "Internal server error" });
+        next(error);
     }
 };
 
@@ -77,6 +75,7 @@ export const patchTasks = async (req, res, next) => {
         const task = req.task;
         const { title, description, status, priority, dueDate, assignedTo } = req.body;
 
+        // Also checked in errorHandler controller
         if (title !== undefined) {
             const isSame = await Task.findOne({
                 title,
@@ -121,7 +120,7 @@ export const patchTasks = async (req, res, next) => {
     }
 };
 
-export const deleteTasks = async (req, res) => {
+export const deleteTasks = async (req, res, next) => {
     try {
         const task = req.task;
 
@@ -129,7 +128,6 @@ export const deleteTasks = async (req, res) => {
 
         res.status(200).json({ message: "Task deleted" });
     } catch (error) {
-        console.log("Error in deleteTasks task controller : ", error);
-        res.status(500).json({ message: "Internal server error" });
+        next(error);
     }
 };
