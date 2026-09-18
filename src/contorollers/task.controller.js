@@ -69,3 +69,68 @@ export const getTasks = async (req, res) => {
         res.status(500).json({ message: "Internal server error" });
     }
 };
+
+export const patchTasks = async (req, res) => {
+    try {
+        const team = req.team;
+        const projectId = req.project._id;
+        const task = req.task;
+        const { title, description, status, priority, dueDate, assignedTo } = req.body;
+
+        if (title !== undefined) {
+            const isSame = await Task.findOne({
+                title,
+                project: projectId,
+                _id: { $ne: task._id }
+            });
+            if (isSame)
+                return res.status(400).json({ message: "Task with this name already exists" });
+
+            task.title = title;
+        }
+
+        if (description !== undefined)
+            task.description = description;
+
+        if (status !== undefined)
+            task.status = status;
+
+        if (priority !== undefined)
+            task.priority = priority;
+
+        if (dueDate !== undefined)
+            task.dueDate = dueDate;
+
+        if (assignedTo !== undefined) {
+            const isMember = team.members.some(
+                member => member.user.equals(assignedTo)
+            );
+            if (!isMember)
+                return res.status(400).json({ message: "Unauthorized - the assigned to user does not belong to this team" });
+
+            task.assignedTo = assignedTo;
+        }
+        await task.save();
+
+        const result = task.toObject();
+        delete result.createdBy;
+
+        res.status(200).json(result);
+    } catch (error) {
+        console.log("Error in patchTasks task controller : ", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
+
+export const deleteTasks = async (req, res) => {
+    try {
+        const task = req.task;
+
+        await task.deleteOne();
+
+        res.status(200).json({ message: "Task deleted" });
+    } catch (error) {
+        console.log("Error in deleteTasks task controller : ", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+};
