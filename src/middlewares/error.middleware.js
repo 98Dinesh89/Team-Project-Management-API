@@ -22,6 +22,12 @@ export const errorHandler = (err, req, res, next) => {
         });
     }
 
+    if (err.code === 11000) {
+        return res.status(409).json({
+            message: "A record with this message already exists"
+        });
+    }
+
     res.status(500).json({
         message: "Internal server error"
     });
