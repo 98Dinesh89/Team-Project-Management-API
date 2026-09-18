@@ -70,7 +70,7 @@ export const getTasks = async (req, res) => {
     }
 };
 
-export const patchTasks = async (req, res) => {
+export const patchTasks = async (req, res, next) => {
     try {
         const team = req.team;
         const projectId = req.project._id;
@@ -117,8 +117,7 @@ export const patchTasks = async (req, res) => {
 
         res.status(200).json(result);
     } catch (error) {
-        console.log("Error in patchTasks task controller : ", error);
-        res.status(500).json({ message: "Internal server error" });
+        next(error);
     }
 };
 
