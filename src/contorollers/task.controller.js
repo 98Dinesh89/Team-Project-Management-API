@@ -58,11 +58,81 @@ export const createTask = async (req, res, next) => {
 
 export const getTasks = async (req, res, next) => {
     try {
+        const { status, priority, assignedTo, sortBy, order, page, limit, search, fields } = req.query;
         const projectId = req.project._id;
 
-        const tasks = await Task.find({ project: projectId });
+        const filter = {
+            project: projectId
+        }
 
-        res.status(200).json(tasks);
+        if (status !== undefined) filter.status = status;
+        if (priority !== undefined) filter.priority = priority;
+        if (assignedTo !== undefined) filter.assignedTo = assignedTo;
+        if (search !== undefined) {
+            filter.title = {
+                $regex: search,
+                $options: "i"
+            };
+        }
+
+        const allowedFields = [
+            "project",
+            "title",
+            "description",
+            "status",
+            "priority",
+            "assignedTo",
+            "dueDate",
+            "createdAt",
+            "updatedAt"
+        ];
+        const requestedFields = fields
+            ? fields.split(",")
+            : allowedFields;
+
+        const selectedFields = requestedFields
+            .filter(field => allowedFields.includes(field))
+            .join(" ");
+
+        const sort = {};
+        if (sortBy) {
+            sort[sortBy] = order === "desc" ? -1 : 1;
+        }
+
+        const pageNumber = Number(page) || 1;
+        const limitNumber = Number(limit) || 5;
+        const skip = (pageNumber - 1) * limitNumber;
+
+        const tasks = await Task
+            .find(filter)
+            .select(selectedFields)
+            .sort(sort).skip(skip)
+            .limit(limitNumber)
+            .populate("assignedTo", "name email")
+            .populate({
+                path: "project",
+                select: "name status team",
+                populate: {
+                    path: "team",
+                    select: "name"
+                }
+            });
+
+        const totalTasks = await Task.countDocuments(filter);
+        const totalPages = Math.ceil(totalTasks / limitNumber);
+
+        res.status(200).json(
+            {
+                tasks,
+                pagination: {
+                    page: pageNumber,
+                    limit: limitNumber,
+                    totalTasks,
+                    totalPages
+                }
+            }
+        );
+
     } catch (error) {
         next(error);
     }
