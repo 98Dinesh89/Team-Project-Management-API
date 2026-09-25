@@ -42,9 +42,14 @@ const taskSchema = new mongoose.Schema(
     }
 );
 
+
 taskSchema.index(
     { title: 1, project: 1 },
     { unique: true }
+);
+
+taskSchema.index(
+    { project: 1 }
 );
 
 const Task = mongoose.model("Task", taskSchema);

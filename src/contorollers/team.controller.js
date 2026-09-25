@@ -1,5 +1,6 @@
 import User from "../models/user.model.js";
 import Team from "../models/team.model.js";
+import mongoose from "mongoose";
 
 export const createTeam = async (req, res, next) => {
     try {
@@ -91,3 +92,52 @@ export const addMember = async (req, res, next) => {
         next(error);
     }
 };
+
+// export const transactionTest = async (req, res, next) => {
+//     const session = await mongoose.startSession();
+
+//     try {
+//         session.startTransaction();
+
+//         const userId = req.user._id;
+
+//         // Operation 1
+//         const [team] = await Team.create(
+//             [
+//                 {
+//                     name: "Transaction Test Team 2",
+//                     owner: userId,
+//                     members: [
+//                         {
+//                             user: userId,
+//                             role: "owner"
+//                         }
+//                     ]
+//                 }
+//             ],
+//             { session }
+//         );
+
+//         console.log("Team created:", team._id);
+
+//         // Operation 2 — deliberately fails
+//         await User.findByIdAndUpdate(
+//             "not-a-valid-object-id",
+//             { $set: { name: "This will fail" } },
+//             { session }
+//         );
+
+//         await session.commitTransaction();
+
+//         res.status(200).json({
+//             message: "Transaction successful"
+//         });
+
+//     } catch (error) {
+//         await session.abortTransaction();
+//         next(error);
+
+//     } finally {
+//         session.endSession();
+//     }
+// };
