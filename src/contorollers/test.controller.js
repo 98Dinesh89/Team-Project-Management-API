@@ -63,3 +63,14 @@ export const nonAtomicTaskUpdate = async (req, res, next) => {
         next(error);
     }
 };
+
+export const rateLimitTest = async (req, res, next) => {
+    try {
+        res.status(200).json({
+            message: "Request allowed",
+            time: new Date().toISOString()
+        });
+    } catch (error) {
+        next(error);
+    }
+};
