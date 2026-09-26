@@ -1,6 +1,7 @@
 import app from "./app.js";
 import connectDB from "./config/db.js";
 import { ENV } from "./config/env.js";
+import redisClient from "./config/redis.js";
 
 const PORT = ENV.PORT || 6767;
 

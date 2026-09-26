@@ -1,4 +1,5 @@
 import Task from "../models/task.model.js";
+import redisClient from "../config/redis.js";
 
 export const atomicTaskUpdate = async (req, res, next) => {
     try {
@@ -69,6 +70,25 @@ export const rateLimitTest = async (req, res, next) => {
         res.status(200).json({
             message: "Request allowed",
             time: new Date().toISOString()
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+export const redisTest = async (req, res, next) => {
+    try {
+        const count = await redisClient.incr("test:count");
+
+        if (count === 1) {
+            await redisClient.expire("test:count", 60);
+        }
+
+        const ttl = await redisClient.ttl("test:count");
+
+        res.status(200).json({
+            count,
+            ttl
         });
     } catch (error) {
         next(error);
