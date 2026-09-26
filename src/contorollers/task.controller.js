@@ -1,3 +1,4 @@
+import redisClient from "../config/redis.js";
 import Task from "../models/task.model.js";
 
 export const createTask = async (req, res, next) => {
@@ -61,6 +62,30 @@ export const getTasks = async (req, res, next) => {
         const { status, priority, assignedTo, sortBy, order, page, limit, search, fields } = req.query;
         const projectId = req.project._id;
 
+        let versionKey = await redisClient.get(`tasks:project:version:${projectId}`);
+        if (!versionKey) {
+            versionKey = "1";
+            await redisClient.set(
+                `tasks:project:version:${projectId}`,
+                versionKey,
+                {
+                    EX: 3600
+                }
+            );
+        }
+
+        const cacheKey = `tasks:project:${projectId}:${versionKey}` +
+            JSON.stringify(req.query);
+
+        const cachedTasks = await redisClient.get(cacheKey);
+
+        if (cachedTasks) {
+            return res.status(200).json({
+                source: "redis",
+                ...JSON.parse(cachedTasks)
+            });
+        }
+
         const filter = {
             project: projectId
         }
@@ -121,15 +146,28 @@ export const getTasks = async (req, res, next) => {
         const totalTasks = await Task.countDocuments(filter);
         const totalPages = Math.ceil(totalTasks / limitNumber);
 
+        const response = {
+            tasks,
+            pagination: {
+                page: pageNumber,
+                limit: limitNumber,
+                totalTasks,
+                totalPages
+            }
+        }
+
+        await redisClient.set(
+            cacheKey,
+            JSON.stringify(response),
+            {
+                EX: 60
+            }
+        );
+
         res.status(200).json(
             {
-                tasks,
-                pagination: {
-                    page: pageNumber,
-                    limit: limitNumber,
-                    totalTasks,
-                    totalPages
-                }
+                source: "mongodb",
+                ...response
             }
         );
 
@@ -144,6 +182,7 @@ export const patchTasks = async (req, res, next) => {
         const projectId = req.project._id;
         const task = req.task;
         const { title, description, status, priority, dueDate, assignedTo } = req.body;
+
 
         // Also checked in errorHandler controller
         if (title !== undefined) {
@@ -180,6 +219,12 @@ export const patchTasks = async (req, res, next) => {
             task.assignedTo = assignedTo;
         }
         await task.save();
+        await redisClient.set(`tasks:project:version:${projectId}`, "1", {
+            NX: true,
+            EX: 3600
+        });
+
+        await redisClient.incr(`tasks:project:version:${projectId}`);
 
         const result = task.toObject();
         delete result.createdBy;
@@ -192,9 +237,16 @@ export const patchTasks = async (req, res, next) => {
 
 export const deleteTasks = async (req, res, next) => {
     try {
+        projectId = req.project._id;
         const task = req.task;
 
         await task.deleteOne();
+        await redisClient.set(`tasks:project:version:${projectId}`, "1", {
+            NX: true,
+            EX: 3600
+        });
+
+        await redisClient.incr(`tasks:project:version:${projectId}`);
 
         res.status(200).json({ message: "Task deleted" });
     } catch (error) {
