@@ -2,16 +2,16 @@ const requests = new Map();
 const windowMs = 60 * 1000;
 const maxRequests = 5;
 
-setInterval(() => {
-    const now = Date.now();
+// setInterval(() => {
+//     const now = Date.now();
 
-    for (const [key, record] of requests) {
-        if (now - record.startTime >= windowMs) {
-            requests.delete(key);
-        }
-    }
-    console.log("expired keys deleted!!");
-}, windowMs);
+//     for (const [key, record] of requests) {
+//         if (now - record.startTime >= windowMs) {
+//             requests.delete(key);
+//         }
+//     }
+//     console.log("expired keys deleted!!");
+// }, windowMs);
 
 export const testRateLimiter = (req, res, next) => {
     const key = req.ip;
