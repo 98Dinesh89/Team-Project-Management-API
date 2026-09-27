@@ -6,10 +6,6 @@ export const createProject = async (req, res, next) => {
         const { name, description } = req.body;
         const makerId = req.user._id;
 
-        if (!name)
-            return res.status(400).json({ message: "project name is required" });
-
-
         // This is also checked in errorHandker middleware
         const project = await Project.findOne({
             name,
