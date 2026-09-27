@@ -1,7 +1,7 @@
 import { generateToken } from "../lib/generateToken.js";
 import User from "../models/user.model.js";
 import bcrypt from "bcryptjs";
-
+import { emailQueue } from "../queues/email.queue.js";
 
 export const register = async (req, res, next) => {
     const { name, email, password } = req.body;
@@ -39,11 +39,40 @@ export const register = async (req, res, next) => {
         await newUser.save();
         generateToken(newUser._id, res);
 
-        res.status(201).json({
-            _id: newUser._id,
-            name: newUser.name,
-            email: newUser.email
-        });
+        // send email (add job into email queue)
+        await emailQueue.add(
+            "verification-email",
+            {
+                email: newUser.email,
+                name: newUser.name,
+                verificationToken: "sendRegisterEmail"
+            },
+            {
+                attempts: 3,
+                backoff: {
+                    type: "exponential",
+                    delay: 1000
+                },
+            }
+        );
+        await emailQueue.add(
+            "reminder-email",
+            {
+                email: newUser.email,
+                name: newUser.name,
+            },
+            {
+                delay: 10 * 1000
+            }
+        );
+
+        res.status(201).json(
+            {
+                _id: newUser._id,
+                name: newUser.name,
+                email: newUser.email
+            }
+        );
 
     } catch (error) {
         next(error);
