@@ -8,9 +8,6 @@ export const createTask = async (req, res, next) => {
         const team = req.team;
         const { title, description, assignedTo, status, priority, dueDate } = req.body;
 
-        if (!title || !priority)
-            return res.status(400).json({ message: "Some fields are required" });
-
         const newTask = new Task({
             title,
             project: projectId,

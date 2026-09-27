@@ -1,14 +1,11 @@
 import User from "../models/user.model.js";
 import Team from "../models/team.model.js";
-import mongoose from "mongoose";
+// import mongoose from "mongoose";
 
 export const createTeam = async (req, res, next) => {
     try {
         const { name } = req.body;
         const ownerId = req.user._id;
-
-        if (!name)
-            return res.status(400).json({ message: "Team name is required" });
 
         // Also checked in error handler
         const team = await Team.findOne({
@@ -59,7 +56,7 @@ export const getTeams = async (req, res, next) => {
 
         res.status(200).json(teamList);
     } catch (error) {
-        next();
+        next(error);
     }
 };
 
@@ -67,9 +64,6 @@ export const addMember = async (req, res, next) => {
     try {
         const team = req.team;
         const { userId } = req.body;
-
-        if (!userId)
-            return res.status(400).json({ message: "User Id is required" });
 
         if (!(await User.findById(userId)))
             return res.status(400).json({ message: "Such user does not exist" });
