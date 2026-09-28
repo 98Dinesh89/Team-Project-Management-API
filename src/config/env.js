@@ -10,4 +10,5 @@ export const ENV = {
     REDIS_URL: process.env.REDIS_URL,
     SMTP_USER: process.env.SMTP_USER,
     SMTP_PASS: process.env.SMTP_PASS,
+    FRONTEND_URL: process.env.FRONTEND_URL,
 }

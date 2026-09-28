@@ -234,7 +234,7 @@ export const patchTasks = async (req, res, next) => {
 
 export const deleteTasks = async (req, res, next) => {
     try {
-        projectId = req.project._id;
+        const projectId = req.project._id;
         const task = req.task;
 
         await task.deleteOne();
