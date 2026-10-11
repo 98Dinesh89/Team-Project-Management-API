@@ -268,5 +268,3 @@ Potential next steps include:
 This is a hands-on backend engineering project focused on understanding how to design, implement, and improve server-side APIs.
 
 The emphasis is on correctness, access control, maintainability, and reliable request processing—not just making endpoints work under ideal conditions.
-
-**Repository:** [Add your GitHub repository URL here]
