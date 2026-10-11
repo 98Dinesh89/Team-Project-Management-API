@@ -101,25 +101,41 @@ The application includes several security and configuration practices:
 
 These practices help separate application configuration from source code and establish a foundation for safer deployment.
 
+## Architecture and Request Lifecycle
+
 ## Technology Stack
 
-| Technology     | Purpose                                        |
-| -------------- | ---------------------------------------------- |
-| Node.js        | JavaScript runtime for server-side development |
-| Express.js     | HTTP server and REST API routing               |
-| MongoDB        | Persistent document database                   |
-| Mongoose       | Database schemas, models, and queries          |
-| JWT            | Authentication tokens                          |
-| bcrypt         | Password hashing                               |
-| Zod            | Request data validation                        |
-| Redis          | Caching and rate limiting                      |
-| BullMQ         | Background job queue                           |
-| Nodemailer     | Email delivery                                 |
-| Helmet         | Security-related HTTP headers                  |
-| CORS           | Cross-origin request configuration             |
-| Git and GitHub | Version control and source code management     |
+| Technology     | Purpose                                              |
+| -------------- | ---------------------------------------------------- |
+| Node.js        | JavaScript runtime for server-side development       |
+| Express.js     | HTTP server and REST API routing                     |
+| MongoDB        | Persistent document database                         |
+| Mongoose       | Database schemas, models, and queries                |
+| JWT            | Authentication tokens                                |
+| bcrypt         | Password hashing                                     |
+| Zod            | Request data validation                              |
+| Redis          | Caching and rate limiting                            |
+| BullMQ         | Background job queue                                 |
+| Nodemailer     | Email delivery                                       |
+| Helmet         | Security-related HTTP headers                        |
+| CORS           | Cross-origin request configuration                   |
+| **Postman**    | API endpoint testing and request/response validation |
+| Git and GitHub | Version control and source code management           |
 
-## Architecture and Request Lifecycle
+## Testing the API with Postman
+
+Postman was used to send HTTP requests to the API, inspect responses, and verify endpoint behavior during development.
+
+API testing included:
+
+- Sending requests using HTTP methods such as GET and POST.
+- Testing protected endpoints with authentication.
+- Checking request bodies and JSON responses.
+- Verifying authorization rules for team owners and members.
+- Testing invalid input and error responses.
+- Exercising task retrieval features such as filtering, sorting, pagination, and search.
+
+Postman helped me debug endpoints, validate request-response behavior, and test both successful operations and failure scenarios during development.
 
 The application separates responsibilities into dedicated modules to make the code easier to understand, test, and extend.
 
